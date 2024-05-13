@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt_BR" ng-app="cincoirmaos-app">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- ICON -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+    <!--Angular Active-->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-i18n/1.8.2/angular-locale_pt-br.min.js"></script>
+
+    <!--Bootstrap-->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <!--CSS-->
+    <link rel="stylesheet" href="./assets/css/realiza-compra.css" />
+    <!--Fonts-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bangers&display=swap"
+      rel="stylesheet"
+    />
+    <title>Atacado 5Irmãos - Carrinho</title>
+  </head>
+  <body ng-controller="CartController">
+    <header class="navbar navbar-expand-lg p-4">
+      <a href="/" class="navbar-brand logo">5Irmãos Atacado</a>
+
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbar"
+        aria-controls="navbar"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-end" id="navbar">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a href="/" class="nav-link active" aria-current="page">Home</a>
+          </li>
+          <li class="nav-item">
+            <a href="index.html#product-list" class="nav-link">Produtos</a>
+          </li>
+          <li class="nav-item">
+            <a href="realiza-compra.html" class="nav-link">Carrinho</a>
+          </li>
+          <li class="nav-item">
+            <a href="pedidos-realizados.html" class="nav-link">Meus Pedidos</a>
+          </li>
+          <li ng-if="isAuthenticated && isAdmin" class="nav-item">
+            <a href="produtos-cadastrados.html" class="nav-link">Admin</a>
+          </li>
+          <li ng-if="isAuthenticated " class="nav-item">
+            <button ng-click="logout()" class="nav-link">Sair</button>
+          </li>
+        </ul>
+      </div>
+    </header>
+
+    <h2 class="products-title my-5">Meu Carrinho</h2>
+    <div class="container d-flex justify-content-center product-cart-area mb-5">
+      <div class="products-cart">
+        <div
+          ng-repeat="item in items"
+          class="product-cart d-flex justify-content-start align-items-center p-4 rounded mb-4"
+        >
+          <div class="product-img-area">
+            <img src="{{item.product.img}}" alt="{{item.product.name}}" />
+          </div>
+          <div class="product-information">
+            <p class="fs-2"><strong>{{item.product.name}}</strong></p>
+            <p class="fs-5">
+              <strong>Valor: {{item.productPrice | currency}}</strong>
+            </p>
+            <div class="action-area d-flex">
+              <div class="input-group mb-3">
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  id="button-addon2"
+                  ng-disabled="item.quantity <= 1"
+                  ng-click="decrease(item.id)"
+                >
+                  -
+                </button>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="1"
+                  aria-label="Recipient's username"
+                  aria-describedby="button-addon2"
+                  ng-change="onQuantityChange(item.id)"
+                  ng-model="item.quantity"
+                />
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  id="button-addon2"
+                  ng-click="increase(item.id)"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <p class="fs-5">
+              <strong
+                >Subtotal:{{item.productPrice * item.quantity |
+                currency}}</strong
+              >
+            </p>
+          </div>
+
+          <div class="add-remove-area d-flex flex-column">
+            <button
+              ng-click="deleteCartItem(item.product.id)"
+              class="btn btn-success"
+            >
+              <i class="ri-delete-bin-6-fill"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        ng-if="items.length != 0 "
+        class="confirm-order bg-warning p-5 d-flex flex-column justify-content-center"
+      >
+        <h2 class="mb-4">REALIZAR COMPRA</h2>
+        <p>SUBTOTAL: {{total | currency}}</p>
+        <p>ENTREGA: R$3,00</p>
+        <p class="mb-4">TOTAL {{total + 3 | currency}}</p>
+        <button class="btn btn-success" ng-click="closeCart()">
+          Finalizar Compra
+        </button>
+      </div>
+    </div>
+
+    <div ng-if="items.length == 0" class="row">
+      <div class="col-md-12 text-center">
+        <p class="fs-5">
+          Nenhum item no carrinho.
+          <a href="./index.html#product-list">Veja nossos produtos!</a>
+        </p>
+      </div>
+    </div>
+
+    <script src="./assets/js/lib/jwt-decode.js"></script>
+    <script src="./assets/js/app.js"></script>
+    <script src="./assets/js/services/session.service.js"></script>
+    <script src="./assets/js/services/admin.service.js"></script>
+    <script src="./assets/js/realiza-compra.js"></script>
+  </body>
+</html>
